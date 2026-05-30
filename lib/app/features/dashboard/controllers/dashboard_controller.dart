@@ -13,53 +13,63 @@ class DashboardController extends GetxController {
   _Profile getProfil() {
     return const _Profile(
       photo: AssetImage(ImageRasterPath.avatar1),
-      name: "Firgia",
-      email: "flutterwithgia@gmail.com",
+      name: "Wanshan",
+      email: "algersking5157@gmail.com",
     );
   }
 
-  List<TaskCardData> getAllTask() {
-    return [
-      const TaskCardData(
-        title: "Landing page UI Design",
-        dueDay: 2,
-        totalComments: 50,
-        type: TaskType.todo,
-        totalContributors: 30,
-        profilContributors: [
-          AssetImage(ImageRasterPath.avatar1),
-          AssetImage(ImageRasterPath.avatar2),
-          AssetImage(ImageRasterPath.avatar3),
-          AssetImage(ImageRasterPath.avatar4),
-        ],
-      ),
-      const TaskCardData(
-        title: "Landing page UI Design",
-        dueDay: -1,
-        totalComments: 50,
-        totalContributors: 34,
-        type: TaskType.inProgress,
-        profilContributors: [
-          AssetImage(ImageRasterPath.avatar5),
-          AssetImage(ImageRasterPath.avatar6),
-          AssetImage(ImageRasterPath.avatar7),
-          AssetImage(ImageRasterPath.avatar8),
-        ],
-      ),
-      const TaskCardData(
-        title: "Landing page UI Design",
-        dueDay: 1,
-        totalComments: 50,
-        totalContributors: 34,
-        type: TaskType.done,
-        profilContributors: [
-          AssetImage(ImageRasterPath.avatar5),
-          AssetImage(ImageRasterPath.avatar3),
-          AssetImage(ImageRasterPath.avatar4),
-          AssetImage(ImageRasterPath.avatar2),
-        ],
-      ),
-    ];
+  Future<List<TaskCardData>> getAllTask() async {
+    try {
+      final response = await http.get(
+        Uri.parse("http://shanpetcare.vip.cpolar.cn/device/data"),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        print('后端返回数据:');
+        print(data);
+        if (data.isEmpty) {
+          return [];
+        }
+        final latest = data.first;
+        // 解析字段
+        final deviceId = latest["device_id"] ?? "Unknown Device";
+        final temp = (latest["T"] ?? latest["temperature"] ?? 0).toDouble();
+        final soil = (latest["S"] ?? 0).toDouble();
+        final salt = (latest["A"] ?? 0).toDouble();
+        final voltage = (latest["V"] ?? 0).toDouble();
+        final receivedAt = latest["received_at"];
+        // 加8小时
+        String receivedAtStr = receivedAt;
+        try {
+          final dt = DateTime.parse(receivedAt).add(const Duration(hours: 8));
+          receivedAtStr = dt.toString().replaceFirst(' ', 'T');
+        } catch (_) {}
+        final card = TaskCardData(
+          title: deviceId,
+          dueDay: 0, // today
+          totalComments: temp.toInt(), // 温度
+          type: TaskType.todo,
+          totalContributors: 1,
+          profilContributors: const [
+            AssetImage(ImageRasterPath.avatar1),
+          ],
+          temperature: temp,
+          soil: soil,
+          salt: salt,
+          voltage: voltage,
+          receivedAt: receivedAtStr,
+        );
+        print('生成的TaskCardData:');
+        print('id: ' + card.title + ', 温度: ' + card.temperature.toString() + ', 湿度: ' + card.soil.toString() + ', 盐分: ' + card.salt.toString() + ', 电压: ' + card.voltage.toString() + ', 上传: ' + (card.receivedAt ?? ''));
+        return [card];
+      } else {
+        throw Exception("Failed to load device data");
+      }
+    } catch (e) {
+      print(e);
+      return [];
+    }
   }
 
   ProjectCardData getSelectedProject() {

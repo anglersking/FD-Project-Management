@@ -1,7 +1,9 @@
 library dashboard;
 
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:http/http.dart' as http;
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:project_management/app/constans/app_constants.dart';
@@ -75,11 +77,20 @@ class DashboardScreen extends GetView<DashboardController> {
               child: GetPremiumCard(onPressed: () {}),
             ),
             const SizedBox(height: kSpacing * 2),
-            _buildTaskOverview(
-              data: controller.getAllTask(),
-              headerAxis: Axis.vertical,
-              crossAxisCount: 6,
-              crossAxisCellCount: 6,
+            FutureBuilder<List<TaskCardData>>(
+              future: controller.getAllTask(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return _buildTaskOverview(
+                  data: snapshot.data!,
+                  // 这里补充原本的 headerAxis、crossAxisCount、crossAxisCellCount 等参数
+                  headerAxis: Axis.vertical,
+                  crossAxisCount: 6,
+                  crossAxisCellCount: 6,
+                );
+              },
             ),
             const SizedBox(height: kSpacing * 2),
             _buildActiveProject(
@@ -108,17 +119,25 @@ class DashboardScreen extends GetView<DashboardController> {
                           : Axis.horizontal,
                     ),
                     const SizedBox(height: kSpacing * 2),
-                    _buildTaskOverview(
-                      data: controller.getAllTask(),
-                      headerAxis: (constraints.maxWidth < 850)
-                          ? Axis.vertical
-                          : Axis.horizontal,
-                      crossAxisCount: 6,
-                      crossAxisCellCount: (constraints.maxWidth < 950)
-                          ? 6
-                          : (constraints.maxWidth < 1100)
-                              ? 3
-                              : 2,
+                    FutureBuilder<List<TaskCardData>>(
+                      future: controller.getAllTask(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        return _buildTaskOverview(
+                          data: snapshot.data!,
+                          headerAxis: (constraints.maxWidth < 850)
+                              ? Axis.vertical
+                              : Axis.horizontal,
+                          crossAxisCount: 6,
+                          crossAxisCellCount: (constraints.maxWidth < 950)
+                              ? 6
+                              : (constraints.maxWidth < 1100)
+                                  ? 3
+                                  : 2,
+                        );
+                      },
                     ),
                     const SizedBox(height: kSpacing * 2),
                     _buildActiveProject(
@@ -180,10 +199,18 @@ class DashboardScreen extends GetView<DashboardController> {
                     const SizedBox(height: kSpacing * 2),
                     _buildProgress(),
                     const SizedBox(height: kSpacing * 2),
-                    _buildTaskOverview(
-                      data: controller.getAllTask(),
-                      crossAxisCount: 6,
-                      crossAxisCellCount: (constraints.maxWidth < 1360) ? 3 : 2,
+                    FutureBuilder<List<TaskCardData>>(
+                      future: controller.getAllTask(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        return _buildTaskOverview(
+                          data: snapshot.data!,
+                          crossAxisCount: 6,
+                          crossAxisCellCount: (constraints.maxWidth < 1360) ? 3 : 2,
+                        );
+                      },
                     ),
                     const SizedBox(height: kSpacing * 2),
                     _buildActiveProject(

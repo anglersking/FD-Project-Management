@@ -13,6 +13,13 @@ class TaskCardData {
   final int totalComments;
   final int totalContributors;
 
+  // 新增字段
+  final double? temperature;
+  final double? soil;
+  final double? salt;
+  final double? voltage;
+  final String? receivedAt;
+
   const TaskCardData({
     required this.title,
     required this.dueDay,
@@ -20,6 +27,11 @@ class TaskCardData {
     required this.totalContributors,
     required this.type,
     required this.profilContributors,
+    this.temperature,
+    this.soil,
+    this.salt,
+    this.voltage,
+    this.receivedAt,
   });
 }
 
@@ -58,11 +70,33 @@ class TaskCard extends StatelessWidget {
                 title: data.title,
                 subtitle: (data.dueDay < 0)
                     ? "Late in ${data.dueDay * -1} days"
-                    : "Due in " +
+                    : "虎皮兰 Due in " +
                         ((data.dueDay > 1) ? "${data.dueDay} days" : "today"),
                 onPressedMore: onPressedMore,
               ),
             ),
+            // 新增：多行数据显示
+            if (data.temperature != null ||
+                data.soil != null ||
+                data.salt != null ||
+                data.voltage != null ||
+                data.receivedAt != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: kSpacing / 2, vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (data.temperature != null)
+                      Text('温度: ${data.temperature}'),
+                    if (data.soil != null) Text('土壤湿度: ${data.soil}'),
+                    if (data.salt != null) Text('盐分: ${data.salt}'),
+                    if (data.voltage != null) Text('电压: ${data.voltage}'),
+                    if (data.receivedAt != null)
+                      Text('上传: ${data.receivedAt}'),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: kSpacing),
               child: Row(
