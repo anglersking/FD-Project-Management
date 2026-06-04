@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_management/app/constans/app_constants.dart';
+import 'package:project_management/app/config/routes/app_pages.dart';
 import '../../controllers/login_controller.dart';
 
 class LoginScreen extends GetView<LoginController> {
@@ -48,10 +49,10 @@ class LoginScreen extends GetView<LoginController> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
-                const Color.fromRGBO(128, 109, 255, 1),
-                const Color.fromRGBO(159, 84, 252, 1),
+                Color.fromRGBO(128, 109, 255, 1),
+                Color.fromRGBO(159, 84, 252, 1),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -61,9 +62,9 @@ class LoginScreen extends GetView<LoginController> {
           child: const Icon(Icons.task_alt_rounded, color: Colors.white, size: 22),
         ),
         const SizedBox(width: 10),
-        Text(
+        const Text(
           'ProjectFlow',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -77,9 +78,9 @@ class LoginScreen extends GetView<LoginController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Welcome back 👋',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -88,10 +89,7 @@ class LoginScreen extends GetView<LoginController> {
         const SizedBox(height: 6),
         Text(
           'Sign in to continue to your workspace',
-          style: TextStyle(
-            fontSize: 14,
-            color: kFontColorPallets[2],
-          ),
+          style: TextStyle(fontSize: 14, color: kFontColorPallets[2]),
         ),
       ],
     );
@@ -164,17 +162,17 @@ class LoginScreen extends GetView<LoginController> {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () {},
+        onPressed: () => Get.toNamed(Routes.forgotPassword),
         style: TextButton.styleFrom(
           padding: EdgeInsets.zero,
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        child: Text(
+        child: const Text(
           'Forgot password?',
           style: TextStyle(
             fontSize: 13,
-            color: const Color.fromRGBO(128, 109, 255, 1),
+            color: Color.fromRGBO(128, 109, 255, 1),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -219,15 +217,19 @@ class LoginScreen extends GetView<LoginController> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: kFontColorPallets[2].withOpacity(0.3), thickness: 1)),
+        Expanded(
+            child: Divider(
+                color: kFontColorPallets[2].withOpacity(0.3), thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: kSpacing / 2),
           child: Text(
-            'or continue with',
+            'or',
             style: TextStyle(fontSize: 12, color: kFontColorPallets[2]),
           ),
         ),
-        Expanded(child: Divider(color: kFontColorPallets[2].withOpacity(0.3), thickness: 1)),
+        Expanded(
+            child: Divider(
+                color: kFontColorPallets[2].withOpacity(0.3), thickness: 1)),
       ],
     );
   }
@@ -242,7 +244,7 @@ class LoginScreen extends GetView<LoginController> {
             style: TextStyle(fontSize: 13, color: kFontColorPallets[2]),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () => Get.toNamed(Routes.register),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
