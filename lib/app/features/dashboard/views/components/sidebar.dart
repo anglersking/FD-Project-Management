@@ -59,6 +59,9 @@ class _Sidebar extends StatelessWidget {
               ],
               onSelected: (index, value) {
                 log("index : $index | label : ${value.label}");
+                if (value.label == "Setting") {
+                  Get.toNamed(Routes.setting);
+                }
               },
             ),
             const Divider(thickness: 1),
