@@ -40,7 +40,7 @@ class ProgressCard extends StatelessWidget {
                   height: 200,
                   width: 200,
                   child: SvgPicture.asset(
-                    ImageVectorPath.happy2,
+                    ImageVectorPath.hupilangif,
                     fit: BoxFit.fitHeight,
                   ),
                 ),
@@ -56,17 +56,17 @@ class ProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "You Have ${data.totalUndone} Undone Tasks",
+                  "你养了 ${data.totalUndone} 种植物",
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  "${data.totalTaskInProress} Tasks are in progress",
+                  "${data.totalTaskInProress} 种植物需要浇水",
                   style: TextStyle(color: kFontColorPallets[1]),
                 ),
                 const SizedBox(height: kSpacing),
                 ElevatedButton(
                   onPressed: onPressedCheck,
-                  child: const Text("Check"),
+                  child: const Text("查看"),
                 )
               ],
             ),

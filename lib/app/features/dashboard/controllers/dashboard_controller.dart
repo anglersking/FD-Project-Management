@@ -52,7 +52,7 @@ class DashboardController extends GetxController {
           type: TaskType.todo,
           totalContributors: 1,
           profilContributors: const [
-            AssetImage(ImageRasterPath.avatar1),
+            AssetImage(ImageRasterPath.hupilan),
           ],
           temperature: temp,
           soil: soil,
@@ -86,19 +86,19 @@ class DashboardController extends GetxController {
       ProjectCardData(
         percent: .3,
         projectImage: const AssetImage(ImageRasterPath.logo2),
-        projectName: "Taxi Online",
+        projectName: "虎皮兰",
         releaseTime: DateTime.now().add(const Duration(days: 130)),
       ),
       ProjectCardData(
         percent: .5,
         projectImage: const AssetImage(ImageRasterPath.logo3),
-        projectName: "E-Movies Mobile",
+        projectName: "多肉植物",
         releaseTime: DateTime.now().add(const Duration(days: 140)),
       ),
       ProjectCardData(
         percent: .8,
         projectImage: const AssetImage(ImageRasterPath.logo4),
-        projectName: "Video Converter App",
+        projectName: "绿箩🪴",
         releaseTime: DateTime.now().add(const Duration(days: 100)),
       ),
     ];
@@ -118,26 +118,26 @@ class DashboardController extends GetxController {
   List<ChattingCardData> getChatting() {
     return const [
       ChattingCardData(
-        image: AssetImage(ImageRasterPath.avatar6),
+        image: AssetImage(ImageRasterPath.hupilan),
         isOnline: true,
-        name: "Samantha",
-        lastMessage: "i added my new tasks",
+        name: "虎皮兰",
+        lastMessage: "我的状态健康,光照很开心,还能活100岁",
         isRead: false,
         totalUnread: 100,
       ),
       ChattingCardData(
         image: AssetImage(ImageRasterPath.avatar3),
         isOnline: false,
-        name: "John",
-        lastMessage: "well done john",
+        name: "多肉植物",
+        lastMessage: "和虎皮兰兄弟一样",
         isRead: true,
         totalUnread: 0,
       ),
       ChattingCardData(
         image: AssetImage(ImageRasterPath.avatar4),
         isOnline: true,
-        name: "Alexander Purwoto",
-        lastMessage: "we'll have a meeting at 9AM",
+        name: "绿萝",
+        lastMessage: "我要渴死了!太黑辣!给我施肥浇水!!不然死给你看",
         isRead: false,
         totalUnread: 1,
       ),

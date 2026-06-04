@@ -21,7 +21,7 @@ class _TeamMember extends StatelessWidget {
               color: kFontColorPallets[0],
             ),
             children: [
-              const TextSpan(text: "Team Member "),
+              const TextSpan(text: "已养绿植🪴"),
               TextSpan(
                 text: "($totalMember)",
                 style: TextStyle(

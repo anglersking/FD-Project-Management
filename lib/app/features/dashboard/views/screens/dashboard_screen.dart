@@ -313,7 +313,7 @@ class DashboardScreen extends GetView<DashboardController> {
                 const SizedBox(height: kSpacing / 2),
                 const ProgressReportCard(
                   data: ProgressReportCardData(
-                    title: "1st Sprint",
+                    title: "植物状态总览",
                     doneTask: 5,
                     percent: .3,
                     task: 3,
