@@ -15,7 +15,7 @@ class _RecentMessages extends StatelessWidget {
         Icon(EvaIcons.messageCircle, color: Theme.of(context).primaryColor),
         const SizedBox(width: 10),
         Text(
-          "Recent Messages",
+          "植物发来消息",
           style: TextStyle(color: Theme.of(context).primaryColor),
         ),
         const Spacer(),
