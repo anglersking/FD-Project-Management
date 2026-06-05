@@ -59,8 +59,25 @@ class _Sidebar extends StatelessWidget {
               ],
               onSelected: (index, value) {
                 log("index : $index | label : ${value.label}");
-                if (value.label == "Setting") {
-                  Get.toNamed(Routes.setting);
+                switch (value.label) {
+                  case "Dashboard":
+                    Get.offAllNamed(Routes.dashboard);
+                    break;
+                  case "Reports":
+                    Get.toNamed(Routes.reports);
+                    break;
+                  case "Calendar":
+                    Get.toNamed(Routes.calendar);
+                    break;
+                  case "Email":
+                    Get.toNamed(Routes.email);
+                    break;
+                  case "Profil":
+                    Get.toNamed(Routes.profile);
+                    break;
+                  case "Setting":
+                    Get.toNamed(Routes.setting);
+                    break;
                 }
               },
             ),
