@@ -20,54 +20,52 @@ class DashboardController extends GetxController {
 
   Future<List<TaskCardData>> getAllTask() async {
     try {
-      final response = await http.get(
-        Uri.parse("http://shanpetcare.vip.cpolar.cn/device/data"),
-      );
-
-      if (response.statusCode == 200) {
-        final List data = jsonDecode(response.body);
-        print('后端返回数据:');
-        print(data);
-        if (data.isEmpty) {
-          return [];
+      // 先获取用户绑定的设备，取第一个设备ID
+      final token = await AuthService.getToken();
+      String? deviceId;
+      if (token != null) {
+        final mineResult = await ApiService.getMyDevices(token: token);
+        if (mineResult.ok && (mineResult.data as List).isNotEmpty) {
+          deviceId = mineResult.data[0]['device_id'] as String?;
         }
-        final latest = data.first;
-        // 解析字段
-        final deviceId = latest["device_id"] ?? "Unknown Device";
-        final temp = (latest["T"] ?? latest["temperature"] ?? 0).toDouble();
-        final soil = (latest["S"] ?? 0).toDouble();
-        final salt = (latest["A"] ?? 0).toDouble();
-        final voltage = (latest["V"] ?? 0).toDouble();
-        final receivedAt = latest["received_at"];
-        // 加8小时
-        String receivedAtStr = receivedAt;
-        try {
-          final dt = DateTime.parse(receivedAt).add(const Duration(hours: 8));
-          receivedAtStr = dt.toString().replaceFirst(' ', 'T');
-        } catch (_) {}
-        final card = TaskCardData(
+      }
+
+      if (deviceId == null) return [];
+
+      // 使用轻量最新一条接口
+      final latestResult = await ApiService.getDeviceLatest(deviceId: deviceId);
+      if (!latestResult.ok) return [];
+
+      final latest = latestResult.data as Map<String, dynamic>;
+      final temp = (latest["T"] ?? latest["temperature"] ?? 0).toDouble();
+      final soil = (latest["S"] ?? 0).toDouble();
+      final salt = (latest["A"] ?? 0).toDouble();
+      final voltage = (latest["V"] ?? 0).toDouble();
+      final receivedAt = latest["received_at"] ?? '';
+
+      String receivedAtStr = receivedAt;
+      try {
+        final dt = DateTime.parse(receivedAt).add(const Duration(hours: 8));
+        receivedAtStr = dt.toString().replaceFirst(' ', 'T');
+      } catch (_) {}
+
+      return [
+        TaskCardData(
           title: deviceId,
-          dueDay: 0, // today
-          totalComments: temp.toInt(), // 温度
+          dueDay: 0,
+          totalComments: temp.toInt(),
           type: TaskType.todo,
           totalContributors: 1,
-          profilContributors: const [
-            AssetImage(ImageRasterPath.hupilan),
-          ],
+          profilContributors: const [AssetImage(ImageRasterPath.hupilan)],
           temperature: temp,
           soil: soil,
           salt: salt,
           voltage: voltage,
           receivedAt: receivedAtStr,
-        );
-        print('生成的TaskCardData:');
-        print('id: ' + card.title + ', 温度: ' + card.temperature.toString() + ', 湿度: ' + card.soil.toString() + ', 盐分: ' + card.salt.toString() + ', 电压: ' + card.voltage.toString() + ', 上传: ' + (card.receivedAt ?? ''));
-        return [card];
-      } else {
-        throw Exception("Failed to load device data");
-      }
+        )
+      ];
     } catch (e) {
-      print(e);
+      print('getAllTask error: $e');
       return [];
     }
   }

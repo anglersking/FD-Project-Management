@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 /// 统一 API 访问层
 /// baseUrl 指向后端，根据实际部署地址修改
 class ApiService {
-  static const String baseUrl = 'http://192.168.31.54:8080';
+  static const String baseUrl = 'http://shanpetcare.vip.cpolar.cn';
 
   // -------------------------------------------------------------------------
   // 内部辅助

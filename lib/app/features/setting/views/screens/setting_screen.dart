@@ -10,88 +10,99 @@ class SettingScreen extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: SingleChildScrollView(
-        padding: const EdgeInsets.all(kSpacing * 1.5),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: kSpacing * 2),
-              _buildSection(
-                icon: EvaIcons.personOutline,
-                title: 'Account',
-                children: [
-                  _buildInfoTile(label: 'Username', value: 'admin'),
-                  _buildInfoTile(label: 'Email', value: 'admin@example.com'),
-                  _buildActionTile(
-                    icon: EvaIcons.lockOutline,
-                    label: 'Change Password',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacing * 1.5),
-              _buildSection(
-                icon: EvaIcons.bellOutline,
-                title: 'Notifications',
-                children: [
-                  _buildSwitchTile(
-                    label: 'Enable Notifications',
-                    subtitle: 'Turn all notifications on or off',
-                    valueObs: controller.notificationsEnabled,
-                    onChanged: controller.toggleNotifications,
-                  ),
-                  _buildSwitchTile(
-                    label: 'Email Notifications',
-                    subtitle: 'Receive updates via email',
-                    valueObs: controller.emailNotifications,
-                    onChanged: controller.toggleEmailNotifications,
-                  ),
-                  _buildSwitchTile(
-                    label: 'Push Notifications',
-                    subtitle: 'Receive push alerts on device',
-                    valueObs: controller.pushNotifications,
-                    onChanged: controller.togglePushNotifications,
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacing * 1.5),
-              _buildSection(
-                icon: EvaIcons.colorPaletteOutline,
-                title: 'Appearance',
-                children: [
-                  _buildThemeSelector(),
-                ],
-              ),
-              const SizedBox(height: kSpacing * 1.5),
-              _buildSection(
-                icon: EvaIcons.infoOutline,
-                title: 'About',
-                children: [
-                  _buildInfoTile(label: 'Version', value: '1.0.0'),
-                  _buildInfoTile(label: 'Build', value: '2026.06'),
-                  _buildActionTile(
-                    icon: EvaIcons.externalLinkOutline,
-                    label: 'Privacy Policy',
-                    onTap: () {},
-                  ),
-                  _buildActionTile(
-                    icon: EvaIcons.externalLinkOutline,
-                    label: 'Terms of Service',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacing * 3),
-            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(kSpacing * 1.5),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: kSpacing * 2),
+                _buildSection(
+                  icon: EvaIcons.personOutline,
+                  title: 'Account',
+                  children: [
+                    _buildInfoTile(label: 'Username', value: 'admin'),
+                    _buildInfoTile(label: 'Email', value: 'admin@example.com'),
+                    _buildActionTile(
+                      icon: EvaIcons.lockOutline,
+                      label: 'Change Password',
+                      onTap: _showChangePasswordDialog,
+                    ),
+                    _buildActionTile(
+                      icon: EvaIcons.logOutOutline,
+                      label: 'Sign Out',
+                      onTap: _showLogoutDialog,
+                      danger: true,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacing * 1.5),
+                _buildSection(
+                  icon: EvaIcons.bellOutline,
+                  title: 'Notifications',
+                  children: [
+                    _buildSwitchTile(
+                      label: 'Enable Notifications',
+                      subtitle: 'Turn all notifications on or off',
+                      valueObs: controller.notificationsEnabled,
+                      onChanged: controller.toggleNotifications,
+                    ),
+                    _buildSwitchTile(
+                      label: 'Email Notifications',
+                      subtitle: 'Receive updates via email',
+                      valueObs: controller.emailNotifications,
+                      onChanged: controller.toggleEmailNotifications,
+                    ),
+                    _buildSwitchTile(
+                      label: 'Push Notifications',
+                      subtitle: 'Receive push alerts on device',
+                      valueObs: controller.pushNotifications,
+                      onChanged: controller.togglePushNotifications,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacing * 1.5),
+                _buildSection(
+                  icon: EvaIcons.colorPaletteOutline,
+                  title: 'Appearance',
+                  children: [
+                    _buildThemeSelector(),
+                  ],
+                ),
+                const SizedBox(height: kSpacing * 1.5),
+                _buildSection(
+                  icon: EvaIcons.infoOutline,
+                  title: 'About',
+                  children: [
+                    _buildInfoTile(label: 'Version', value: '1.0.0'),
+                    _buildInfoTile(label: 'Build', value: '2026.06'),
+                    _buildActionTile(
+                      icon: EvaIcons.externalLinkOutline,
+                      label: 'Privacy Policy',
+                      onTap: () {},
+                    ),
+                    _buildActionTile(
+                      icon: EvaIcons.externalLinkOutline,
+                      label: 'Terms of Service',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacing * 3),
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Header
+  // ---------------------------------------------------------------------------
   Widget _buildHeader() {
     return Row(
       children: [
@@ -115,6 +126,9 @@ class SettingScreen extends GetView<SettingController> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Section wrapper
+  // ---------------------------------------------------------------------------
   Widget _buildSection({
     required IconData icon,
     required String title,
@@ -150,9 +164,13 @@ class SettingScreen extends GetView<SettingController> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Tiles
+  // ---------------------------------------------------------------------------
   Widget _buildInfoTile({required String label, required String value}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpacing, vertical: kSpacing * 0.75),
+      padding: const EdgeInsets.symmetric(
+          horizontal: kSpacing, vertical: kSpacing * 0.75),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -169,19 +187,30 @@ class SettingScreen extends GetView<SettingController> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool danger = false,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(kBorderRadius),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: kSpacing, vertical: kSpacing * 0.75),
+        padding: const EdgeInsets.symmetric(
+            horizontal: kSpacing, vertical: kSpacing * 0.75),
         child: Row(
           children: [
             Expanded(
-              child: Text(label,
-                  style: TextStyle(fontSize: 14, color: kFontColorPallets[1])),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: danger ? Colors.redAccent : kFontColorPallets[1],
+                ),
+              ),
             ),
-            Icon(icon, size: 16, color: kFontColorPallets[2]),
+            Icon(
+              icon,
+              size: 16,
+              color: danger ? Colors.redAccent : kFontColorPallets[2],
+            ),
           ],
         ),
       ),
@@ -195,7 +224,8 @@ class SettingScreen extends GetView<SettingController> {
     required Function(bool) onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpacing, vertical: kSpacing * 0.5),
+      padding: const EdgeInsets.symmetric(
+          horizontal: kSpacing, vertical: kSpacing * 0.5),
       child: Row(
         children: [
           Expanded(
@@ -203,10 +233,12 @@ class SettingScreen extends GetView<SettingController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style: TextStyle(fontSize: 14, color: kFontColorPallets[1])),
+                    style:
+                        TextStyle(fontSize: 14, color: kFontColorPallets[1])),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: TextStyle(fontSize: 12, color: kFontColorPallets[2])),
+                    style:
+                        TextStyle(fontSize: 12, color: kFontColorPallets[2])),
               ],
             ),
           ),
@@ -224,45 +256,179 @@ class SettingScreen extends GetView<SettingController> {
     final themes = ['Dark', 'Light', 'System'];
     return Padding(
       padding: const EdgeInsets.all(kSpacing),
-      child: Obx(() => Row(
-            children: themes.asMap().entries.map((e) {
-              final index = e.key;
-              final label = e.value;
-              final isSelected = controller.selectedTheme.value == index;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: index < themes.length - 1 ? 8 : 0),
-                  child: GestureDetector(
-                    onTap: () => controller.setTheme(index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
+      child: Obx(
+        () => Row(
+          children: themes.asMap().entries.map((e) {
+            final index = e.key;
+            final label = e.value;
+            final isSelected = controller.selectedTheme.value == index;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                    right: index < themes.length - 1 ? 8 : 0),
+                child: GestureDetector(
+                  onTap: () => controller.setTheme(index),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color.fromRGBO(128, 109, 255, 1)
+                          : const Color.fromRGBO(31, 29, 44, 1),
+                      borderRadius:
+                          BorderRadius.circular(kBorderRadius / 2),
+                      border: isSelected
+                          ? null
+                          : Border.all(
+                              color:
+                                  kFontColorPallets[2].withOpacity(0.2),
+                              width: 1),
+                    ),
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                         color: isSelected
-                            ? const Color.fromRGBO(128, 109, 255, 1)
-                            : const Color.fromRGBO(31, 29, 44, 1),
-                        borderRadius: BorderRadius.circular(kBorderRadius / 2),
-                        border: isSelected
-                            ? null
-                            : Border.all(
-                                color: kFontColorPallets[2].withOpacity(0.2),
-                                width: 1),
-                      ),
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? Colors.white : kFontColorPallets[2],
-                        ),
+                            ? Colors.white
+                            : kFontColorPallets[2],
                       ),
                     ),
                   ),
                 ),
-              );
-            }).toList(),
-          )),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Dialogs
+  // ---------------------------------------------------------------------------
+  void _showChangePasswordDialog() {
+    final phoneCtrl = TextEditingController();
+    final newPwdCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    final ctrl = Get.find<SettingController>();
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: const Color.fromRGBO(38, 40, 55, 1),
+        title: const Text('Change Password',
+            style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: phoneCtrl,
+              keyboardType: TextInputType.phone,
+              style: const TextStyle(color: Colors.white),
+              decoration:
+                  _dialogInputDeco('Phone number', Icons.phone_outlined),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: newPwdCtrl,
+              obscureText: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: _dialogInputDeco(
+                  'New password', Icons.lock_outline_rounded),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: confirmCtrl,
+              obscureText: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: _dialogInputDeco(
+                  'Confirm password', Icons.lock_outline_rounded),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel',
+                style: TextStyle(color: kFontColorPallets[2])),
+          ),
+          Obx(
+            () => ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(128, 109, 255, 1)),
+              onPressed: ctrl.isChangingPassword.value
+                  ? null
+                  : () {
+                      ctrl.changePassword(
+                        phone: phoneCtrl.text.trim(),
+                        newPassword: newPwdCtrl.text.trim(),
+                        confirmPassword: confirmCtrl.text.trim(),
+                      );
+                      Get.back();
+                    },
+              child: ctrl.isChangingPassword.value
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Save'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    final ctrl = Get.find<SettingController>();
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: const Color.fromRGBO(38, 40, 55, 1),
+        title: const Text('Sign Out',
+            style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: kFontColorPallets[1]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel',
+                style: TextStyle(color: kFontColorPallets[2])),
+          ),
+          ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              Get.back();
+              ctrl.logout();
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _dialogInputDeco(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle:
+          TextStyle(color: kFontColorPallets[2], fontSize: 13),
+      prefixIcon: Icon(icon, color: kFontColorPallets[2], size: 18),
+      enabledBorder: OutlineInputBorder(
+        borderSide:
+            BorderSide(color: kFontColorPallets[2].withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(kBorderRadius / 2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+            color: Color.fromRGBO(128, 109, 255, 1)),
+        borderRadius: BorderRadius.circular(kBorderRadius / 2),
+      ),
     );
   }
 }
