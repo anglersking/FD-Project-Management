@@ -84,12 +84,12 @@ class RegisterScreen extends GetView<RegisterController> {
 
   Widget _buildEmailField() {
     return _fieldWrapper(
-      label: 'Email',
+      label: 'Phone Number',
       child: TextField(
-        controller: controller.emailController,
-        keyboardType: TextInputType.emailAddress,
+        controller: controller.phoneController,
+        keyboardType: TextInputType.phone,
         style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: _inputDecoration(hint: 'your@email.com', icon: Icons.mail_outline_rounded),
+        decoration: _inputDecoration(hint: '+86 138 0000 0000', icon: Icons.phone_outlined),
       ),
     );
   }

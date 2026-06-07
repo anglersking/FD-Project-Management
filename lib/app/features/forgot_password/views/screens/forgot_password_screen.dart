@@ -14,7 +14,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           padding: const EdgeInsets.all(kSpacing * 2),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
-            child: Obx(() => controller.isEmailSent.value
+            child: Obx(() => controller.isSuccess.value
                 ? _buildSuccessView()
                 : _buildFormView()),
           ),
@@ -31,7 +31,11 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
         const SizedBox(height: kSpacing),
         _buildTitle(),
         const SizedBox(height: kSpacing * 2),
-        _buildEmailField(),
+        _buildPhoneField(),
+        const SizedBox(height: kSpacing),
+        _buildNewPasswordField(),
+        const SizedBox(height: kSpacing),
+        _buildConfirmPasswordField(),
         const SizedBox(height: kSpacing * 1.5),
         _buildSubmitButton(),
         const SizedBox(height: kSpacing * 2),
@@ -52,18 +56,23 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             color: kNotifColor.withOpacity(0.15),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.mark_email_read_outlined, color: kNotifColor, size: 36),
+          child: Icon(Icons.check_circle_outline_rounded,
+              color: kNotifColor, size: 36),
         ),
         const SizedBox(height: kSpacing * 1.5),
         const Text(
-          'Check your email',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+          'Password Reset!',
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white),
         ),
         const SizedBox(height: kSpacing / 2),
         Text(
-          'We sent a password reset link to\n${controller.emailController.text.trim()}',
+          'Your password has been updated.\nYou can now sign in with your new password.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: kFontColorPallets[2], height: 1.6),
+          style: TextStyle(
+              fontSize: 14, color: kFontColorPallets[2], height: 1.6),
         ),
         const SizedBox(height: kSpacing * 2),
         SizedBox(
@@ -80,18 +89,10 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             ),
             child: const Text(
               'Back to Sign In',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-          ),
-        ),
-        const SizedBox(height: kSpacing),
-        TextButton(
-          onPressed: controller.sendResetEmail,
-          child: Text(
-            "Didn't receive the email? Resend",
-            style: TextStyle(
-              fontSize: 13,
-              color: const Color.fromRGBO(128, 109, 255, 1),
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
             ),
           ),
         ),
@@ -114,49 +115,83 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Forgot Password? 🔑',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+          'Reset Password 🔑',
+          style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: Colors.white),
         ),
         const SizedBox(height: 6),
         Text(
-          "Enter your email and we'll send you a reset link",
+          'Enter your phone number and set a new password',
           style: TextStyle(fontSize: 14, color: kFontColorPallets[2]),
         ),
       ],
     );
   }
 
-  Widget _buildEmailField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Email',
-            style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w500, color: kFontColorPallets[1])),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller.emailController,
-          keyboardType: TextInputType.emailAddress,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          decoration: InputDecoration(
-            hintText: 'your@email.com',
-            hintStyle: TextStyle(color: kFontColorPallets[2], fontSize: 14),
-            prefixIcon: Icon(Icons.mail_outline_rounded, color: kFontColorPallets[2], size: 18),
-            filled: true,
-            fillColor: const Color.fromRGBO(38, 40, 55, 1),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(kBorderRadius / 2),
-              borderSide: BorderSide.none,
+  Widget _buildPhoneField() {
+    return _fieldWrapper(
+      label: 'Phone Number',
+      child: TextField(
+        controller: controller.phoneController,
+        keyboardType: TextInputType.phone,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: _inputDecoration(
+            hint: '+86 138 0000 0000', icon: Icons.phone_outlined),
+      ),
+    );
+  }
+
+  Widget _buildNewPasswordField() {
+    return _fieldWrapper(
+      label: 'New Password',
+      child: Obx(() => TextField(
+            controller: controller.newPasswordController,
+            obscureText: !controller.isPasswordVisible.value,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            decoration: _inputDecoration(
+              hint: '••••••••',
+              icon: Icons.lock_outline_rounded,
+              suffix: IconButton(
+                splashRadius: 18,
+                icon: Icon(
+                  controller.isPasswordVisible.value
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: kFontColorPallets[2],
+                  size: 18,
+                ),
+                onPressed: controller.togglePasswordVisibility,
+              ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(kBorderRadius / 2),
-              borderSide:
-                  const BorderSide(color: Color.fromRGBO(128, 109, 255, 1), width: 1.5),
+          )),
+    );
+  }
+
+  Widget _buildConfirmPasswordField() {
+    return _fieldWrapper(
+      label: 'Confirm New Password',
+      child: Obx(() => TextField(
+            controller: controller.confirmPasswordController,
+            obscureText: !controller.isConfirmPasswordVisible.value,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            decoration: _inputDecoration(
+              hint: '••••••••',
+              icon: Icons.lock_outline_rounded,
+              suffix: IconButton(
+                splashRadius: 18,
+                icon: Icon(
+                  controller.isConfirmPasswordVisible.value
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: kFontColorPallets[2],
+                  size: 18,
+                ),
+                onPressed: controller.toggleConfirmPasswordVisibility,
+              ),
             ),
-          ),
-        ),
-      ],
+          )),
     );
   }
 
@@ -165,7 +200,8 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: controller.isLoading.value ? null : controller.sendResetEmail,
+            onPressed:
+                controller.isLoading.value ? null : controller.resetPassword,
             style: ElevatedButton.styleFrom(
               primary: const Color.fromRGBO(128, 109, 255, 1),
               shape: RoundedRectangleBorder(
@@ -177,11 +213,15 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
                   )
                 : const Text(
-                    'Send Reset Link',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                    'Reset Password',
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
                   ),
           ),
         ));
@@ -210,6 +250,47 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _fieldWrapper({required String label, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: kFontColorPallets[1])),
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: kFontColorPallets[2], fontSize: 14),
+      prefixIcon: Icon(icon, color: kFontColorPallets[2], size: 18),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: const Color.fromRGBO(38, 40, 55, 1),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kBorderRadius / 2),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kBorderRadius / 2),
+        borderSide: const BorderSide(
+            color: Color.fromRGBO(128, 109, 255, 1), width: 1.5),
       ),
     );
   }

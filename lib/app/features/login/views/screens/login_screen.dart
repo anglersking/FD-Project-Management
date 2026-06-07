@@ -100,7 +100,7 @@ class LoginScreen extends GetView<LoginController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Email',
+          'Username / Phone',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -109,12 +109,12 @@ class LoginScreen extends GetView<LoginController> {
         ),
         const SizedBox(height: 8),
         TextField(
-          controller: controller.emailController,
-          keyboardType: TextInputType.emailAddress,
+          controller: controller.identifierController,
+          keyboardType: TextInputType.text,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: _inputDecoration(
-            hint: 'your@email.com',
-            icon: Icons.mail_outline_rounded,
+            hint: 'Username or phone number',
+            icon: Icons.person_outline_rounded,
           ),
         ),
       ],

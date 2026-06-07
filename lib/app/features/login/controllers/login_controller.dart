@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_management/app/config/routes/app_pages.dart';
+import 'package:project_management/app/services/api_service.dart';
+import 'package:project_management/app/services/auth_service.dart';
 
 class LoginController extends GetxController {
-  final emailController = TextEditingController();
+  /// 支持用户名或手机号登录
+  final identifierController = TextEditingController();
   final passwordController = TextEditingController();
 
   final isPasswordVisible = false.obs;
@@ -14,48 +17,46 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
-    final email = emailController.text.trim();
+    final identifier = identifierController.text.trim();
     final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please fill in all fields',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
-        borderRadius: 12,
-        margin: const EdgeInsets.all(16),
-      );
+    if (identifier.isEmpty || password.isEmpty) {
+      _snackError('Please fill in all fields');
       return;
     }
 
     isLoading.value = true;
-
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-
+    final result = await ApiService.login(
+      identifier: identifier,
+      password: password,
+    );
     isLoading.value = false;
 
-    // TODO: replace with real API auth
-    if (email == 'admin' && password == 'admin') {
+    if (result.ok) {
+      final token = result.data['token'] as String;
+      final user = result.data['user'] as Map<String, dynamic>;
+      await AuthService.saveSession(token: token, user: user);
       Get.offAllNamed(Routes.dashboard);
     } else {
-      Get.snackbar(
-        'Login Failed',
-        'Incorrect username or password',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
-        borderRadius: 12,
-        margin: const EdgeInsets.all(16),
-      );
+      _snackError(result.error ?? 'Login failed');
     }
+  }
+
+  void _snackError(String msg) {
+    Get.snackbar(
+      'Error',
+      msg,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent.withOpacity(0.8),
+      colorText: Colors.white,
+      borderRadius: 12,
+      margin: const EdgeInsets.all(16),
+    );
   }
 
   @override
   void onClose() {
-    emailController.dispose();
+    identifierController.dispose();
     passwordController.dispose();
     super.onClose();
   }
