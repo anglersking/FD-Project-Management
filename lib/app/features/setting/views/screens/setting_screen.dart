@@ -10,7 +10,7 @@ class SettingScreen extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.all(kSpacing * 1.5),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -88,7 +88,7 @@ class SettingScreen extends GetView<SettingController> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
