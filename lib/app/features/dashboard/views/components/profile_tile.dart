@@ -33,8 +33,13 @@ class _ProfilTile extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Get.back();
+              final token = await AuthService.getToken();
+              if (token != null) {
+                await ApiService.logout(token: token);
+              }
+              await AuthService.clearSession();
               Get.offAllNamed(Routes.login);
             },
             style: ElevatedButton.styleFrom(
