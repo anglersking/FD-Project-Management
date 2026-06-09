@@ -239,6 +239,37 @@ class ApiService {
     }
     return data?.toString() ?? 'Unknown error';
   }
+
+  // -------------------------------------------------------------------------
+  // 植物图片上传到 MinIO（multipart/form-data）
+  // 返回 { "image_url": "http://..." }
+  // -------------------------------------------------------------------------
+  static Future<ApiResult> uploadPlantImage({
+    required String token,
+    required String deviceId,
+    required List<int> imageBytes,
+    required String fileName,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/device/upload-image/');
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Token $token'
+        ..fields['device_id'] = deviceId
+        ..files.add(http.MultipartFile.fromBytes(
+          'image',
+          imageBytes,
+          filename: fileName,
+        ));
+
+      final streamed = await request.send().timeout(const Duration(seconds: 30));
+      final res = await http.Response.fromStream(streamed);
+      final data = _parse(res);
+      if (res.statusCode == 200) return ApiResult.success(data);
+      return ApiResult.error(_extractError(data));
+    } catch (e) {
+      return ApiResult.error('Network error: $e');
+    }
+  }
 }
 
 /// API 调用结果封装

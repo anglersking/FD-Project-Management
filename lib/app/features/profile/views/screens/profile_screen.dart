@@ -168,6 +168,7 @@ class ProfileScreen extends GetView<ProfileController> {
         children: controller.devices.map((device) {
           final deviceId = device['device_id'] as String? ?? '';
           final deviceName = device['device_name'] as String? ?? '';
+          final plantImage = device['plant_image'] as String? ?? '';
           final latestData = device['latest_data'] as Map<String, dynamic>?;
           final hasData = latestData != null;
 
@@ -180,16 +181,18 @@ class ProfileScreen extends GetView<ProfileController> {
             ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: hasData
-                        ? kNotifColor.withOpacity(0.15)
-                        : Colors.grey.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(EvaIcons.wifi, size: 20,
-                      color: hasData ? kNotifColor : kFontColorPallets[2]),
+                // 植物图片 or 默认图标
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: plantImage.isNotEmpty
+                      ? Image.network(
+                          plantImage,
+                          width: 52,
+                          height: 52,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _defaultDeviceIcon(hasData),
+                        )
+                      : _defaultDeviceIcon(hasData),
                 ),
                 const SizedBox(width: kSpacing),
                 Expanded(
@@ -246,47 +249,202 @@ class ProfileScreen extends GetView<ProfileController> {
     });
   }
 
+  Widget _defaultDeviceIcon(bool hasData) {
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        color: hasData
+            ? kNotifColor.withOpacity(0.15)
+            : Colors.grey.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        EvaIcons.wifi,
+        size: 24,
+        color: hasData ? kNotifColor : kFontColorPallets[2],
+      ),
+    );
+  }
+
   void _showBindDeviceDialog() {
     final deviceIdCtrl = TextEditingController();
     final deviceNameCtrl = TextEditingController();
+    // 清空上次选的图片
+    controller.clearImage();
 
     Get.dialog(
       AlertDialog(
         backgroundColor: const Color.fromRGBO(38, 40, 55, 1),
         title: const Text('绑定设备',
             style: TextStyle(color: Colors.white, fontSize: 16)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: deviceIdCtrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDeco('设备 ID（必填）', EvaIcons.hardDriveOutline),
-            ),
-            const SizedBox(height: kSpacing),
-            TextField(
-              controller: deviceNameCtrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDeco('设备名称（选填）', EvaIcons.editOutline),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: deviceIdCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDeco('设备 ID（必填）', EvaIcons.hardDriveOutline),
+              ),
+              const SizedBox(height: kSpacing),
+              TextField(
+                controller: deviceNameCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDeco('植物名称（选填）', EvaIcons.editOutline),
+              ),
+              const SizedBox(height: kSpacing),
+              // 图片选择区域
+              Obx(() {
+                final bytes = controller.selectedImageBytes.value;
+                return Column(
+                  children: [
+                    if (bytes != null)
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(kBorderRadius / 2),
+                            child: Image.memory(bytes,
+                                height: 140, width: double.infinity, fit: BoxFit.cover),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: GestureDetector(
+                              onTap: controller.clearImage,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Icon(Icons.close, size: 14, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Container(
+                        height: 80,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(28, 30, 42, 1),
+                          borderRadius: BorderRadius.circular(kBorderRadius / 2),
+                          border: Border.all(
+                              color: kFontColorPallets[2].withOpacity(0.3)),
+                        ),
+                        child: Center(
+                          child: Text('未选择植物照片',
+                              style: TextStyle(
+                                  fontSize: 12, color: kFontColorPallets[2])),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showImageSourceSheet(),
+                        icon: const Icon(EvaIcons.imageOutline, size: 15,
+                            color: Color.fromRGBO(128, 109, 255, 1)),
+                        label: const Text('上传植物照片',
+                            style: TextStyle(
+                                color: Color.fromRGBO(128, 109, 255, 1),
+                                fontSize: 13)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          side: const BorderSide(
+                              color: Color.fromRGBO(128, 109, 255, 0.4)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(kBorderRadius / 2)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () {
+                controller.clearImage();
+                Get.back();
+              },
               child: Text('取消', style: TextStyle(color: kFontColorPallets[2]))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(128, 109, 255, 1)),
-            onPressed: () {
-              final id = deviceIdCtrl.text.trim();
-              if (id.isEmpty) return;
-              Get.back();
-              controller.bindDevice(id, deviceName: deviceNameCtrl.text.trim());
-            },
-            child: const Text('绑定'),
-          ),
+          Obx(() => ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(128, 109, 255, 1)),
+                onPressed: controller.isUploadingImage.value
+                    ? null
+                    : () {
+                        final id = deviceIdCtrl.text.trim();
+                        if (id.isEmpty) return;
+                        Get.back();
+                        controller.bindDevice(id,
+                            deviceName: deviceNameCtrl.text.trim());
+                      },
+                child: controller.isUploadingImage.value
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Text('绑定'),
+              )),
         ],
+      ),
+    );
+  }
+
+  void _showImageSourceSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(38, 40, 55, 1),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('选择植物照片',
+                style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(EvaIcons.imageOutline,
+                  color: Color.fromRGBO(128, 109, 255, 1)),
+              title: const Text('从相册选择',
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
+              onTap: () {
+                Get.back();
+                controller.pickImage(fromCamera: false);
+              },
+            ),
+            ListTile(
+              leading: const Icon(EvaIcons.cameraOutline,
+                  color: Color.fromRGBO(128, 109, 255, 1)),
+              title: const Text('拍照',
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
+              onTap: () {
+                Get.back();
+                controller.pickImage(fromCamera: true);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
@@ -332,3 +490,4 @@ class ProfileScreen extends GetView<ProfileController> {
     );
   }
 }
+
