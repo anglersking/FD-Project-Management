@@ -190,16 +190,11 @@ class _RankRow extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                entry.plantName,
+                "${entry.plantName} (${entry.healthScore})",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13),
               ),
-            ),
-            Text(
-              "${entry.healthScore}分",
-              style: TextStyle(
-                  fontSize: 12, color: kFontColorPallets[1]),
             ),
           ],
         ),

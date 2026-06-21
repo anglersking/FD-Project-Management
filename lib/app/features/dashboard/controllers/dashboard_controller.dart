@@ -81,7 +81,7 @@ class DashboardController extends GetxController {
         soil: l?.soil,
         salt: l?.salt,
         voltage: l?.voltage,
-        receivedAt: l?.receivedAt,
+        receivedAt: fmtUploadTime(l?.receivedAt),
         healthColor: p.health.color,
         healthLabel: p.health.label,
       );
@@ -166,5 +166,19 @@ class DashboardController extends GetxController {
       AssetImage(ImageRasterPath.avatar5),
       AssetImage(ImageRasterPath.avatar6),
     ];
+  }
+}
+
+// 上报时间转中国时间：后端为 UTC，统一 +8h 后格式化。
+// 顶级函数，供 dashboard 库内（controller 与 screen）共用。
+String? fmtUploadTime(String? raw) {
+  if (raw == null || raw.isEmpty) return null;
+  try {
+    final dt = DateTime.parse(raw).add(const Duration(hours: 8));
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${dt.year}-${two(dt.month)}-${two(dt.day)} '
+        '${two(dt.hour)}:${two(dt.minute)}';
+  } catch (_) {
+    return raw;
   }
 }

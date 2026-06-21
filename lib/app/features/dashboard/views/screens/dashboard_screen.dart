@@ -522,7 +522,7 @@ class DashboardScreen extends GetView<DashboardController> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    "上报时间：${l!.receivedAt}",
+                    "上报时间：${fmtUploadTime(l!.receivedAt)}",
                     style: TextStyle(
                         fontSize: 12, color: kFontColorPallets[2]),
                   ),
