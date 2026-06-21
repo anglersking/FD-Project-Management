@@ -6,6 +6,14 @@ class AppTheme {
   /// default application theme
   static ThemeData get basic => ThemeData(
         fontFamily: Font.poppins,
+        // Poppins 不含中文字形，缺字时回退到系统中文字体（修复手机中文乱码）
+        fontFamilyFallback: const [
+          'PingFang SC',
+          'Heiti SC',
+          'Noto Sans CJK SC',
+          'Microsoft YaHei',
+          'sans-serif',
+        ],
         primaryColorDark: const Color.fromRGBO(111, 88, 255, 1),
         primaryColor: const Color.fromRGBO(128, 109, 255, 1),
         primaryColorLight: const Color.fromRGBO(159, 84, 252, 1),

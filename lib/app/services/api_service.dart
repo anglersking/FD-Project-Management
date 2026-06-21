@@ -16,10 +16,18 @@ class ApiService {
   }
 
   static dynamic _parse(http.Response res) {
+    // 强制按 UTF-8 解码响应体，否则中文会变成 æ–‡å— 这类乱码
+    // （http 包的 res.body 在响应头缺 charset 时默认用 Latin-1 解码）
+    String decoded;
     try {
-      return jsonDecode(res.body);
+      decoded = utf8.decode(res.bodyBytes);
     } catch (_) {
-      return res.body;
+      decoded = res.body;
+    }
+    try {
+      return jsonDecode(decoded);
+    } catch (_) {
+      return decoded;
     }
   }
 
@@ -208,6 +216,23 @@ class ApiService {
       final res = await http.Response.fromStream(streamedRes);
       if (res.statusCode == 200) return ApiResult.success(null);
       return ApiResult.error(_extractError(_parse(res)));
+    } catch (e) {
+      return ApiResult.error('Network error: $e');
+    }
+  }
+
+  /// 获取主页聚合数据（需登录）
+  static Future<ApiResult> getDashboard({required String token}) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$baseUrl/device/dashboard/'),
+            headers: _headers(token: token),
+          )
+          .timeout(const Duration(seconds: 15));
+      final data = _parse(res);
+      if (res.statusCode == 200) return ApiResult.success(data);
+      return ApiResult.error(_extractError(data));
     } catch (e) {
       return ApiResult.error('Network error: $e');
     }

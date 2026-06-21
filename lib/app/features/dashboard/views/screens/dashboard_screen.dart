@@ -1,9 +1,7 @@
 library dashboard;
 
-import 'dart:convert';
 import 'dart:developer';
 
-import 'package:http/http.dart' as http;
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:project_management/app/constans/app_constants.dart';
@@ -27,6 +25,9 @@ import 'package:project_management/app/utils/helpers/app_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+// models (standalone, not part)
+import 'package:project_management/app/features/dashboard/models/dashboard_data.dart';
 
 // binding
 part '../../bindings/dashboard_binding.dart';
@@ -61,7 +62,12 @@ class DashboardScreen extends GetView<DashboardController> {
                 child: _Sidebar(data: controller.getSelectedProject()),
               ),
             ),
-      body: SingleChildScrollView(
+      body: Obx(() {
+        // 显式订阅可观察变量，确保 Obx 在自身作用域内读到（否则 ResponsiveBuilder 嵌套会让 Obx 报错白屏）
+        controller.dashboard.value;
+        controller.isLoading.value;
+        controller.healthFilter.value;
+        return SingleChildScrollView(
           child: ResponsiveBuilder(
         mobileBuilder: (context, constraints) {
           return Column(children: [
@@ -80,20 +86,11 @@ class DashboardScreen extends GetView<DashboardController> {
               child: GetPremiumCard(onPressed: () {}),
             ),
             const SizedBox(height: kSpacing * 2),
-            FutureBuilder<List<TaskCardData>>(
-              future: controller.getAllTask(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                return _buildTaskOverview(
-                  data: snapshot.data!,
-                  // 这里补充原本的 headerAxis、crossAxisCount、crossAxisCellCount 等参数
-                  headerAxis: Axis.vertical,
-                  crossAxisCount: 6,
-                  crossAxisCellCount: 6,
-                );
-              },
+            _buildTaskOverview(
+              data: controller.getTaskCards(),
+              headerAxis: Axis.vertical,
+              crossAxisCount: 6,
+              crossAxisCellCount: 6,
             ),
             const SizedBox(height: kSpacing * 2),
             _buildActiveProject(
@@ -122,25 +119,17 @@ class DashboardScreen extends GetView<DashboardController> {
                           : Axis.horizontal,
                     ),
                     const SizedBox(height: kSpacing * 2),
-                    FutureBuilder<List<TaskCardData>>(
-                      future: controller.getAllTask(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        return _buildTaskOverview(
-                          data: snapshot.data!,
-                          headerAxis: (constraints.maxWidth < 850)
-                              ? Axis.vertical
-                              : Axis.horizontal,
-                          crossAxisCount: 6,
-                          crossAxisCellCount: (constraints.maxWidth < 950)
-                              ? 6
-                              : (constraints.maxWidth < 1100)
-                                  ? 3
-                                  : 2,
-                        );
-                      },
+                    _buildTaskOverview(
+                      data: controller.getTaskCards(),
+                      headerAxis: (constraints.maxWidth < 850)
+                          ? Axis.vertical
+                          : Axis.horizontal,
+                      crossAxisCount: 6,
+                      crossAxisCellCount: (constraints.maxWidth < 950)
+                          ? 6
+                          : (constraints.maxWidth < 1100)
+                              ? 3
+                              : 2,
                     ),
                     const SizedBox(height: kSpacing * 2),
                     _buildActiveProject(
@@ -202,18 +191,10 @@ class DashboardScreen extends GetView<DashboardController> {
                     const SizedBox(height: kSpacing * 2),
                     _buildProgress(),
                     const SizedBox(height: kSpacing * 2),
-                    FutureBuilder<List<TaskCardData>>(
-                      future: controller.getAllTask(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        return _buildTaskOverview(
-                          data: snapshot.data!,
-                          crossAxisCount: 6,
-                          crossAxisCellCount: (constraints.maxWidth < 1360) ? 3 : 2,
-                        );
-                      },
+                    _buildTaskOverview(
+                      data: controller.getTaskCards(),
+                      crossAxisCount: 6,
+                      crossAxisCellCount: (constraints.maxWidth < 1360) ? 3 : 2,
                     ),
                     const SizedBox(height: kSpacing * 2),
                     _buildActiveProject(
@@ -249,7 +230,9 @@ class DashboardScreen extends GetView<DashboardController> {
             ],
           );
         },
-      )),
+      ),
+        );
+      }),
     );
   }
 
@@ -274,6 +257,16 @@ class DashboardScreen extends GetView<DashboardController> {
   }
 
   Widget _buildProgress({Axis axis = Axis.horizontal}) {
+    final total = controller.totalPlants;
+    final needCare = controller.needCareCount;
+    final healthy = controller.dashboard.value?.healthyCount ?? 0;
+    final sub = controller.dashboard.value?.subhealthyCount ?? 0;
+    final percent = controller.healthyPercent;
+    final ranking = controller.getRankingEntries();
+    void onTapRank(RankingEntry e) {
+      final p = controller.findPlantById(e.deviceId);
+      if (p != null) _showPlantDetail(Get.context!, p);
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kSpacing),
       child: (axis == Axis.horizontal)
@@ -282,23 +275,25 @@ class DashboardScreen extends GetView<DashboardController> {
                 Flexible(
                   flex: 5,
                   child: ProgressCard(
-                    data: const ProgressCardData(
-                      totalUndone: 10,
-                      totalTaskInProress: 2,
+                    data: ProgressCardData(
+                      totalUndone: total,
+                      totalTaskInProress: needCare,
+                      ranking: ranking,
                     ),
                     onPressedCheck: () {},
+                    onTapRanking: onTapRank,
                   ),
                 ),
                 const SizedBox(width: kSpacing / 2),
-                const Flexible(
+                Flexible(
                   flex: 4,
                   child: ProgressReportCard(
                     data: ProgressReportCardData(
-                      title: "1st Sprint",
-                      doneTask: 5,
-                      percent: .3,
-                      task: 3,
-                      undoneTask: 2,
+                      title: "植物健康总览",
+                      doneTask: sub,
+                      percent: percent,
+                      task: healthy,
+                      undoneTask: needCare,
                     ),
                   ),
                 ),
@@ -307,20 +302,22 @@ class DashboardScreen extends GetView<DashboardController> {
           : Column(
               children: [
                 ProgressCard(
-                  data: const ProgressCardData(
-                    totalUndone: 10,
-                    totalTaskInProress: 2,
+                  data: ProgressCardData(
+                    totalUndone: total,
+                    totalTaskInProress: needCare,
+                    ranking: ranking,
                   ),
                   onPressedCheck: () {},
+                  onTapRanking: onTapRank,
                 ),
                 const SizedBox(height: kSpacing / 2),
-                const ProgressReportCard(
+                ProgressReportCard(
                   data: ProgressReportCardData(
-                    title: "植物状态总览",
-                    doneTask: 5,
-                    percent: .3,
-                    task: 3,
-                    undoneTask: 2,
+                    title: "植物健康总览",
+                    doneTask: sub,
+                    percent: percent,
+                    task: healthy,
+                    undoneTask: needCare,
                   ),
                 ),
               ],
@@ -347,7 +344,17 @@ class DashboardScreen extends GetView<DashboardController> {
                 padding: const EdgeInsets.only(bottom: kSpacing),
                 child: _OverviewHeader(
                   axis: headerAxis,
-                  onSelected: (task) {},
+                  onSelected: (task) {
+                    if (task == null) {
+                      controller.healthFilter.value = null;
+                    } else if (task == TaskType.done) {
+                      controller.healthFilter.value = PlantHealth.healthy;
+                    } else if (task == TaskType.inProgress) {
+                      controller.healthFilter.value = PlantHealth.subhealthy;
+                    } else {
+                      controller.healthFilter.value = PlantHealth.needCare;
+                    }
+                  },
                 ),
               )
             : TaskCard(
@@ -381,7 +388,13 @@ class DashboardScreen extends GetView<DashboardController> {
           crossAxisSpacing: kSpacing,
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            return ProjectCard(data: data[index]);
+            final plants = controller.plants;
+            return InkWell(
+              onTap: index < plants.length
+                  ? () => _showPlantDetail(context, plants[index])
+                  : null,
+              child: ProjectCard(data: data[index]),
+            );
           },
           staggeredTileBuilder: (int index) =>
               StaggeredTile.fit(crossAxisCellCount),
@@ -430,5 +443,111 @@ class DashboardScreen extends GetView<DashboardController> {
           )
           .toList(),
     ]);
+  }
+
+  // 植物详情底部弹窗
+  void _showPlantDetail(BuildContext context, PlantItem p) {
+    final l = p.latest;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardColor,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kBorderRadius)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(kSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white,
+                    backgroundImage: p.plantImage.isNotEmpty
+                        ? NetworkImage(p.plantImage)
+                        : const AssetImage(ImageRasterPath.hupilan)
+                            as ImageProvider,
+                  ),
+                  const SizedBox(width: kSpacing),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          p.plantName,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: p.health.color,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "${p.health.label}  ·  ${p.healthScore}分",
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: kSpacing),
+              if (p.advice.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(kSpacing / 2),
+                  decoration: BoxDecoration(
+                    color: p.health.color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(kBorderRadius / 2),
+                  ),
+                  child: Text("🌿 建议：${p.advice}"),
+                ),
+              const SizedBox(height: kSpacing),
+              _detailRow("温度", l?.temperature, "°C"),
+              _detailRow("土壤湿度", l?.soil, "%"),
+              _detailRow("盐分", l?.salt, ""),
+              _detailRow("光照", l?.light, ""),
+              _detailRow("电压", l?.voltage, "V"),
+              if (l?.receivedAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "上报时间：${l!.receivedAt}",
+                    style: TextStyle(
+                        fontSize: 12, color: kFontColorPallets[2]),
+                  ),
+                ),
+              const SizedBox(height: kSpacing),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String label, double? value, String unit) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: kFontColorPallets[2])),
+          Text(
+            value != null ? "$value$unit" : "—",
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
   }
 }

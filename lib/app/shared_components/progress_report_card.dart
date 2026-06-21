@@ -56,9 +56,9 @@ class ProgressReportCard extends StatelessWidget {
               const SizedBox(height: 15),
               _RichText(value1: "${data.task} ", value2: "健康"),
               const SizedBox(height: 3),
-              _RichText(value1: "${data.doneTask} ", value2: "刚浇完水"),
+              _RichText(value1: "${data.doneTask} ", value2: "亚健康"),
               const SizedBox(height: 3),
-              _RichText(value1: "${data.undoneTask} ", value2: "未浇水"),
+              _RichText(value1: "${data.undoneTask} ", value2: "需关照"),
             ],
           ),
           const Spacer(),
@@ -119,11 +119,11 @@ class _Indicator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            (percent * 100).toString() + " %",
+            (percent * 100).toStringAsFixed(0) + " %",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const Text(
-            "Completed",
+            "健康占比",
             style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12),
           ),
         ],

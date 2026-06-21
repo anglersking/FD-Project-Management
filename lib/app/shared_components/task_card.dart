@@ -20,6 +20,10 @@ class TaskCardData {
   final double? voltage;
   final String? receivedAt;
 
+  // 健康三态覆盖（用于圆点颜色与状态按钮）
+  final Color? healthColor;
+  final String? healthLabel;
+
   const TaskCardData({
     required this.title,
     required this.dueDay,
@@ -32,6 +36,8 @@ class TaskCardData {
     this.salt,
     this.voltage,
     this.receivedAt,
+    this.healthColor,
+    this.healthLabel,
   });
 }
 
@@ -66,9 +72,11 @@ class TaskCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(5),
               child: _Tile(
-                dotColor: data.type.getColor(),
+                dotColor: data.healthColor ?? data.type.getColor(),
                 title: data.title,
-                subtitle: (data.dueDay < 0)
+                subtitle: (data.healthLabel != null)
+                    ? "状态：${data.healthLabel}"
+                    : (data.dueDay < 0)
                     ? "Late in ${data.dueDay * -1} days"
                     : "虎皮兰 Due in " +
                         ((data.dueDay > 1) ? "${data.dueDay} days" : "today"),
@@ -105,14 +113,14 @@ class TaskCard extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      primary: data.type.getColor(),
+                      primary: data.healthColor ?? data.type.getColor(),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     onPressed: onPressedTask,
                     child: Text(
-                      data.type.toStringValue(),
+                      data.healthLabel ?? data.type.toStringValue(),
                     ),
                   ),
                   ListProfilImage(
