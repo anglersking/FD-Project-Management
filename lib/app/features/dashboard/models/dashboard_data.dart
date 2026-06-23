@@ -65,7 +65,10 @@ class PlantLatest {
       soil: d(j['S']),
       salt: d(j['A']),
       light: d(j['L']),
-      voltage: d(j['V']),
+      voltage: () {
+        final mv = d(j['V']);
+        return mv == null ? null : mv / 1000.0; // mV -> V
+      }(),
       receivedAt: j['received_at'] as String?,
     );
   }

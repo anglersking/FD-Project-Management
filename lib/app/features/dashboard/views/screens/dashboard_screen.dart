@@ -20,6 +20,7 @@ import 'package:project_management/app/shared_components/search_field.dart';
 import 'package:project_management/app/shared_components/selection_button.dart';
 import 'package:project_management/app/shared_components/task_card.dart';
 import 'package:project_management/app/shared_components/today_text.dart';
+import 'package:project_management/app/shared_components/plant_history_chart.dart';
 import 'package:project_management/app/utils/helpers/app_helpers.dart';
 
 import 'package:flutter/material.dart';
@@ -527,6 +528,9 @@ class DashboardScreen extends GetView<DashboardController> {
                         fontSize: 12, color: kFontColorPallets[2]),
                   ),
                 ),
+              const SizedBox(height: kSpacing),
+              // 近 7 天传感器趋势折线图（温度/土壤湿度/盐分/光照/电压可切换）
+              PlantHistoryChart(deviceId: p.deviceId, days: 7),
               const SizedBox(height: kSpacing),
             ],
           ),
